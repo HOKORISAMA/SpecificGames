@@ -9,9 +9,9 @@ Features:
 ---------
 ✅ Packs all files from a directory into a PAK archive.
 ✅ Sorts files by name for deterministic results.
-✅ Sets first file offset = 2048 (0x800).
-✅ Writes end offset (fileCount + 1 entries total).
-✅ Simple — no audio conversion, all files packed raw.
+✅ First file offset = 2048 (0x800).
+✅ Writes fileCount, file offsets, and final end offset at end of header.
+✅ No compression, no conversion — raw data only.
 
 Usage:
 ------
@@ -56,18 +56,23 @@ def pack_pak(input_dir, output_pak):
         current_offset += len(data)
         print(f"  {file_path.name}: {len(data)} bytes")
 
-    # Add the final "end offset" (fileCount + 1 entries total)
-    offsets.append(current_offset)
+    end_offset = current_offset
 
     # -----------------------------------------------------------------------
-    # Write header: [count][offsets...]
+    # Write header
     # -----------------------------------------------------------------------
     with open(output_pak, 'wb') as pak:
+        # File count
         pak.write(struct.pack('<I', file_count))
+
+        # File offsets (without end offset)
         for off in offsets:
             pak.write(struct.pack('<I', off))
 
-        # Pad header up to FIRST_FILE_OFFSET (0x800)
+        # Write end offset at end of header
+        pak.write(struct.pack('<I', end_offset))
+
+        # Pad header to 0x800 boundary
         pad_len = FIRST_FILE_OFFSET - pak.tell()
         if pad_len < 0:
             raise RuntimeError(f"Header too large ({pak.tell()} bytes) to fit before 0x800 boundary.")
@@ -83,7 +88,7 @@ def pack_pak(input_dir, output_pak):
     print(f"   Output: {output_pak}")
     print(f"   Files: {file_count}")
     print(f"   First file offset: 0x{FIRST_FILE_OFFSET:X}")
-    print(f"   End offset: 0x{current_offset:X}")
+    print(f"   End offset: 0x{end_offset:X}")
     print(f"   Total size: {total_size:,} bytes")
 
 
@@ -95,18 +100,19 @@ def verify_pak(pak_path):
     try:
         with open(pak_path, 'rb') as f:
             file_count = struct.unpack('<I', f.read(4))[0]
-            offsets = [struct.unpack('<I', f.read(4))[0] for _ in range(file_count + 1)]
+            offsets = [struct.unpack('<I', f.read(4))[0] for _ in range(file_count)]
+            end_offset = struct.unpack('<I', f.read(4))[0]
             pak_size = os.path.getsize(pak_path)
 
             print(f"\n🔎 Verifying: {pak_path}")
             print(f"  File count: {file_count}")
             print(f"  First offset: 0x{offsets[0]:X}")
-            print(f"  End offset: 0x{offsets[-1]:X} (should match file size ~0x{pak_size:X})")
+            print(f"  End offset: 0x{end_offset:X} (should match file size ~0x{pak_size:X})")
 
             if offsets[0] != 0x800:
                 print(f"⚠️  Warning: first offset != 0x800")
-            if offsets[-1] != pak_size:
-                print(f"⚠️  End offset mismatch: header says {offsets[-1]}, file size is {pak_size}")
+            if end_offset != pak_size:
+                print(f"⚠️  End offset mismatch: header says {end_offset}, file size is {pak_size}")
                 return False
 
         print("✓ PAK structure verified OK")

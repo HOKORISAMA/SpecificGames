@@ -26,7 +26,7 @@ Includes both **Python** and **C# (.NET)** implementations.
 | Platform | Format | Tools | Notes |
 |-----------|---------|--------|--------|
 | **PC (Japanese VN)** | `.dat` | `extract_dat.py`, `pack_dat.py`, `TimeLeap.exe` | Full unpack/repack support |
-| **Xbox 360** | `.pak` | `extract_pak.py`, `pack_pak.py`, `TimeLeap.exe` | Full support with XMA2 detection & 2048-byte alignment |
+| **Xbox 360** | `.pak` | `extract_pak.py`, `pack_pak.py`, `TimeLeap.exe` | Full support with XMA2 detection |
 
 ---
 
