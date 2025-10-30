@@ -8,15 +8,14 @@ This allows access to the internal game assets for research, translation, and mo
 
 ## Features
 
-- ✅ Extract `.dat` archive files used by **Time Leap**
-- 🗂 Dumps files into readable directory structure
-- 🔍 Useful for asset inspection and reverse engineering work
-- 🛠 Intended primarily for *translation and modding workflows*
+- ✅ Extract files from the game's `.dat` archives
+- ✅ Repack files back into `.dat` archives (preserves index layout)
+- 🗂 Dumped files preserve directory structure recorded in the archive index
+- 🔁 Round-trip support for basic modify → repack → test workflows
+- 🔍 Tooling intended for asset inspection, translation and format research
 
 ## Limitations / WIP
 
-- ❌ Repacking / rebuilding `.dat` archives is **not supported yet**
-- ❌ No automatic script or text extraction helpers yet
 - 💡 Additional engine format research is ongoing
 
 ## Use Case

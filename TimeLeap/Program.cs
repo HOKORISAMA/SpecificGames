@@ -3,47 +3,80 @@ using System.IO;
 
 namespace TimeLeap
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        private static void ShowHelp()
+        {
+            Console.WriteLine("Usage:");
+            Console.WriteLine("  TimeLeap.exe <mode> <version: xbox|vn> <input.dat> [output_folder]");
+            Console.WriteLine();
+            Console.WriteLine("Modes:");
+            Console.WriteLine("  -u    Unpack .dat/.pak file");
+            Console.WriteLine("  -c    Pack folder into .dat/.pak file");
+            Console.WriteLine();
+            Console.WriteLine("Examples:");
+            Console.WriteLine("  TimeLeap.exe -u xbox text.pak extracted\\");
+            Console.WriteLine("  TimeLeap.exe -u vn text.dat extracted\\");
+            Console.WriteLine("  TimeLeap.exe -c xbox extracted\\ text.pak");
+            Console.WriteLine("  TimeLeap.exe -c vn extracted\\ text.dat");
+            Console.WriteLine();
+        }
+
+        public static void Main(string[] args)
         {
             Console.WriteLine("=================================");
-            Console.WriteLine("  TimeLeap DAT File Extractor");
+            Console.WriteLine("  TimeLeap DAT/PAK File Tool");
+            Console.WriteLine("  For Xbox 360 and JP Visual Novel Versions");
             Console.WriteLine("=================================\n");
 
-            if (args.Length < 1)
+            if (args.Length < 3)
             {
-                Console.WriteLine("Usage:");
-                Console.WriteLine("  TimeLeap.exe <input.dat> [output_folder]\n");
-                Console.WriteLine("Example:");
-                Console.WriteLine("  TimeLeap.exe text.dat extracted\\\n");
+                ShowHelp();
                 return;
             }
 
-            string datFile = args[0].Trim('"', '\'');
-            string outputDir;
+            string mode = args[0];
+            string version = args[1].ToLowerInvariant();
+            string inputPath = args[2].Trim('"', '\'');
 
-            if (args.Length >= 2)
-            {
-                outputDir = args[1].Trim('"', '\'');
-            }
+            string outputPath;
+            if (args.Length >= 4)
+                outputPath = args[3].Trim('"', '\'');
             else
-            {
-                // Default output folder: filename + "_out"
-                string nameWithoutExt = Path.GetFileNameWithoutExtension(datFile);
-                outputDir = nameWithoutExt;
-            }
+                outputPath = mode.Equals("-u", StringComparison.OrdinalIgnoreCase)
+                    ? Path.GetFileNameWithoutExtension(inputPath)
+                    : inputPath + (version == "xbox" ? ".pak" : ".dat");
 
-            Console.WriteLine($"[+] Input File : {datFile}");
-            Console.WriteLine($"[+] Output Dir : {outputDir}");
+            Console.WriteLine($"[+] Mode       : {mode}");
+            Console.WriteLine($"[+] Version    : {version}");
+            Console.WriteLine($"[+] Input      : {inputPath}");
+            Console.WriteLine($"[+] Output     : {outputPath}");
             Console.WriteLine();
 
             try
             {
-                var unpacker = new TimeLeap();
-                unpacker.Unpack(datFile, outputDir);
+                ITimeLeapTool tool = version switch
+                {
+                    "xbox" => new TimeLeapPak(),
+                    "vn" => new TimeLeapDat(),
+                    _ => throw new ArgumentException("Invalid version specified. Use 'xbox' or 'vn'.")
+                };
 
-                Console.WriteLine("\n[✓] Extraction completed successfully.");
+                if (mode.Equals("-u", StringComparison.OrdinalIgnoreCase))
+                {
+                    tool.Unpack(inputPath, outputPath);
+                    Console.WriteLine("\n[✓] Extraction completed successfully.");
+                }
+                else if (mode.Equals("-c", StringComparison.OrdinalIgnoreCase))
+                {
+                    tool.Pack(inputPath, outputPath);
+                    Console.WriteLine("\n[✓] Packing completed successfully.");
+                }
+                else
+                {
+                    Console.WriteLine("[!] Invalid mode specified.\n");
+                    ShowHelp();
+                }
             }
             catch (Exception ex)
             {
