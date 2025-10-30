@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PAK Packer Tool (QLie / Custom Engine)
+PAK Packer Tool (Xbox)
 -----------------------------------------
 
 Packs extracted raw files (including XMA2 audio) into a PAK archive.

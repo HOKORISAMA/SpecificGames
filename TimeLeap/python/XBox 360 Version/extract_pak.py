@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PAK Extractor Tool (QLie / Custom Engine)
+PAK Extractor Tool (Xbox)
 -----------------------------------------
 
 Enhancements:
