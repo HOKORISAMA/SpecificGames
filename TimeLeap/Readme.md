@@ -69,10 +69,10 @@ These tools enable full extraction, inspection, and repacking while preserving o
 ```
 
 **Index Entry (80 bytes, deobfuscated):**
-- Filename (null-padded string)
-- Offset (32/64-bit integer)
+- Filename (null-padded string up to 48 bytes)
+- Offset (32-bit unsigned integer)
 - Reserved fields
-- Size (bytes)
+- Size (32-bit unsigned integer)
 - Additional reserved fields
 
 **Obfuscation Process:**
