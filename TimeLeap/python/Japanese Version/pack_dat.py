@@ -20,7 +20,7 @@ def encode_buffer(buf: bytearray, start_offset: int):
     # Determine mode (same logic as decoder)
     if a4:
         mode = 1
-    elif buf[0] < 0x80:
+    elif buf[0] > 0x80:
         mode = 2
     else:
         mode = 1
